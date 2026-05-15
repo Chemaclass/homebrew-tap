@@ -5,21 +5,21 @@
 class AgnosticAi < Formula
   desc "Sync agent prompts, skills, rules, and hooks across AI coding tools"
   homepage "https://github.com/Chemaclass/agnostic-ai"
-  version "0.14.1"
+  version "0.14.2"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.1/agnostic-ai_darwin_amd64.tar.gz"
-      sha256 "15c226cff267169ba6ffe2a9bc68fd4cdd31f6e3635cb13b81776cc83172773e"
+      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.2/agnostic-ai_darwin_amd64.tar.gz"
+      sha256 "ec50ae71313f4d2e10344956f6afc35e45f2593804621cd0b3b65498897de367"
 
       define_method(:install) do
         bin.install "agnostic-ai"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.1/agnostic-ai_darwin_arm64.tar.gz"
-      sha256 "2d9eed8dac5b6fa188e7c032a262ee75807a477dbe4c1528732baa192f510350"
+      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.2/agnostic-ai_darwin_arm64.tar.gz"
+      sha256 "4dd2fa3d39cb35fe109fb1f000d28127c1f618bf8b7901ab452ed00a37e1baf0"
 
       define_method(:install) do
         bin.install "agnostic-ai"
@@ -29,15 +29,15 @@ class AgnosticAi < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.1/agnostic-ai_linux_amd64.tar.gz"
-      sha256 "ef9480b7aa5d13d6839dc340c5c04999a9c6e80d32d6b5ed4c2300fba031f9df"
+      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.2/agnostic-ai_linux_amd64.tar.gz"
+      sha256 "2d2fbe5516ec325feceda3fb51f82cc77513848f1a644934fdfdd76bf18035cf"
       define_method(:install) do
         bin.install "agnostic-ai"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.1/agnostic-ai_linux_arm64.tar.gz"
-      sha256 "5f82566101c7f2163fe9c159e6f7d456780f8699deec45a94c7c7e4795e4da1b"
+      url "https://github.com/Chemaclass/agnostic-ai/releases/download/v0.14.2/agnostic-ai_linux_arm64.tar.gz"
+      sha256 "7b538e337569e4da6cc2915bbb0684a2b5697560ff22619928a9aa17735c85ee"
       define_method(:install) do
         bin.install "agnostic-ai"
       end
