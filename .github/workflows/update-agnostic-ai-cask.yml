@@ -15,10 +15,15 @@ name: Update agnostic-ai cask
 
 on:
   schedule:
-    # Every two hours at :23. An odd minute to stay out of the on-the-hour
-    # stampede, which is when scheduled jobs queue longest.
-    - cron: "23 */2 * * *"
+    # Every half hour, on an odd minute to stay out of the on-the-hour
+    # stampede when scheduled jobs queue longest. The schedule is the only
+    # trigger a release can actually rely on: dispatching this workflow from
+    # the agnostic-ai repository would itself need a cross-repository token,
+    # which is the credential this design exists to avoid. So the cask can
+    # lag a release by up to half an hour, and that is the trade.
+    - cron: "23,53 * * * *"
   workflow_dispatch:
+  # Ready if a cross-repository token ever exists. Nothing sends this today.
   repository_dispatch:
     types: [agnostic-ai-released]
 
