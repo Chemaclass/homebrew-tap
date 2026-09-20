@@ -1,0 +1,75 @@
+name: Update agnostic-ai cask
+
+# The agnostic-ai release workflow cannot push this cask. Writing to another
+# repository needs a credential that repository trusts, and GitHub offers no
+# API to mint one: creating a GitHub App and creating a personal access token
+# are both browser flows. So a release used to leave brew serving the previous
+# version until someone pushed the cask by hand.
+#
+# This runs here instead, where GITHUB_TOKEN already grants write access to
+# this repository. No secret to create, none to rotate, none to expire.
+#
+# The schedule is what makes it reliable rather than merely automatic: a
+# release that lands while this is broken, or while GitHub Actions is down,
+# is picked up by the next run instead of being missed for good.
+
+on:
+  schedule:
+    # Every two hours at :23. An odd minute to stay out of the on-the-hour
+    # stampede, which is when scheduled jobs queue longest.
+    - cron: "23 */2 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [agnostic-ai-released]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-agnostic-ai-cask
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update the cask
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerate the cask for the latest release
+        id: regen
+        run: |
+          ./scripts/update-cask.sh "${{ github.event.client_payload.tag }}"
+          if git diff --quiet -- Casks/agnostic-ai.rb; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "version=$(grep -m1 -oE 'version "[^"]+"' Casks/agnostic-ai.rb | cut -d'"' -f2)" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Every url in the cask interpolates #{version}, so a wrong version
+      # produces four 404s rather than a bad install. Check before committing.
+      - name: Check the release actually serves those archives
+        if: steps.regen.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.regen.outputs.version }}
+        run: |
+          set -euo pipefail
+          base="https://github.com/Chemaclass/agnostic-ai/releases/download/v${VERSION}"
+          for a in darwin_arm64 darwin_amd64 linux_arm64 linux_amd64; do
+            code=$(curl -sSL -o /dev/null -w '%{http_code}' "${base}/agnostic-ai_${a}.tar.gz")
+            echo "${a}: ${code}"
+            [ "$code" = "200" ] || { echo "::error::${base}/agnostic-ai_${a}.tar.gz returned ${code}"; exit 1; }
+          done
+
+      - name: Commit
+        if: steps.regen.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.regen.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/agnostic-ai.rb
+          git commit -m "feat: bump agnostic-ai to v${VERSION}"
+          git push
